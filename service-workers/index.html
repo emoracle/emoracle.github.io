@@ -1,12 +1,39 @@
 <html>
-  <head></head>
+  <head>
+    <title> Gedetaileerde serviceworker registratie </title>
+  </head>
   <body>
     <p>Registratie status:<strong id="status"></strong></p>
+	<p>State: <strong id="state"></strong></p>
 	<script>
+	  function printState(state){
+	     document.getElementById('state').innerHTML = state;
+	  }
 	  if ('serviceWorker' in navigator){
 	    navigator.serviceWorker.register('service-worker.js', {scope: './'}
-		).then( function(serviceWorker){
+		).then( function(registration){
+		  var serviceWorker;
+		  
 		  document.getElementById('status').innerHTML = 'succesvol';
+		  
+		  if (registration.installing) {
+		    serviceWorker = registration.installing;
+		    printState('installing');
+		  } else if (registration.waiting) {
+		    serviceWorker = registration.waiting;
+		    printState('waiting');
+		  } else if (registration.active) {
+		    serviceWorker = registration.active;
+		    printState('active');
+		  }
+		  
+		  if (serviceWorker){
+		    printState(serviceWorker.state)
+			
+			serviceWorker.addEventListener('stateChange', function(e){
+			  printState(e.target.state);
+			});
+		  }
 		}
 		).catch( function(error){
 		  document.getElementById('status').innerHTML = error;
