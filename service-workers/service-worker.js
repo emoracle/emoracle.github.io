@@ -1,37 +1,43 @@
-var version = 1;
-var cacheName = "stale-" + version;
+'use strict';
 
-self.addEventListener('install', function (e) {
-  self.skipWaiting();
-});
+var
+version = 1,
+currentCache = {
+  offline: 'offline-cache' + version
+},
+offlineUrl = 'offline.html';
 
-self.addEventListener('activate', function (e) {
-  if (self.clients && clients.claim) {
-    clients.claim();
-  }
+self.addEventListener('install', function (event) {
+  event.waitUntil(
+    caches.open(currentCache.offline).then(function (cache) {
+      return cache.addAll([
+          offlineUrl
+        ]);
+    }));
 });
 
 self.addEventListener('fetch', function (event) {
-  // fetch te respons from the network
-  event.respondWith(
-    fetch(event.request).then(function (response) {
-      caches.open(cacheName).then(function (cache) {
-        if (response.status >= 500) {
-          // when we receive an error we fetch a stale version from the cache
-          cache.match(event.request).
-          then(function (response) {
-            // We can not find the version in the cache
-            // So we return the respons from the network
-            return response;
-          }).catch (function () {
-            return response;
-          });
-        } else {
-          // Respons was < 500, so 200. We clone the respons in the cache
-          // and return the respons
-          cache.put(event.request.response.clone());
-          return response;
-        }
-      });
-    }));
-});
+  var
+  request = event.request,
+  isRequestMethodGet = request.method === 'GET';
+
+  if (request.mode === 'navigate' || isRequestMethodGet) {
+    event.respondWith(
+      fetch(createRequestWithCacheBusting(request.url)).catch (function (error) {
+        console.log('Offline: returning offline page ', error);
+        return caches.match(offlineUrl);
+      })
+        );
+    } else {
+      event.respondWith(caches.match(request)
+        .then(function (response) {
+          return response || fetch(request);
+        }));
+    }
+  });
+
+  function createRequestWithCacheBusting(url) {
+	  var 
+	  request,
+	  cacheBustingUrl;
+  }
