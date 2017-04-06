@@ -1,17 +1,20 @@
 'use strict';
 
 var
-version = 1,
+version = 1, 
 currentCache = {
   offline: 'offline-cache' + version
 },
-offlineUrl = 'offline.html';
+offlinePagina = 'offline.html';
 
 self.addEventListener('install', function (event) {
   event.waitUntil(
-    caches.open(currentCache.offline).then(function (cache) {
+    // Open de cache en voeg aan de cache de array
+    // van resources die nodig zijn voor de offline pagina
+    caches.open(currentCache.offline)
+    .then(function (cache) {
       return cache.addAll([
-          offlineUrl
+          offlinePagina
         ]);
     }));
 });
@@ -23,9 +26,10 @@ self.addEventListener('fetch', function (event) {
 
   if (request.mode === 'navigate' || isRequestMethodGet) {
     event.respondWith(
-      fetch(createRequestWithCacheBusting(request.url)).catch (function (error) {
+      fetch(createRequestWithCacheBusting(request.url))
+      .catch (function (error) {
         console.log('Offline: returning offline page ', error);
-        return caches.match(offlineUrl);
+        return caches.match(offlinePagina);
       })
         );
     } else {
@@ -36,7 +40,33 @@ self.addEventListener('fetch', function (event) {
     }
   });
 
-function createRequestWithCacheBusting(url) {
+  self.addEventListener('push', function (event) {
+    var
+    notificationTitle = 'Broadcast',
+    notificationOptions = {};
+
+    if (event.data) {
+      notificationOptions.body = event.data.text();
+    }
+
+    event.waitUntil(Promise.all([self.registration.showNotification(notificationTitle, notificationOptions)]));
+  });
+
+  self.addEventListener('notificationclick', function (event) {
+    event.notification.close();
+
+    var clickResponsePromise = Promise.resolve();
+    if (event.notification.data && event.notification.data.url) {
+      clickResponsePromise = clients.openWindow(event.notification.data.url);
+    }
+
+    event.waitUntil(Promise.all([clickResponsePromise]));
+  });
+
+  /*
+  Helper functions
+   */
+  function createRequestWithCacheBusting(url) {
     var
     request,
     cacheBustingUrl;
