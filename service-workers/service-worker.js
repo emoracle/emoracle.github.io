@@ -36,7 +36,11 @@ self.addEventListener('fetch', function (event) {
     }
   });
 
-  function createRequestWithCacheBusting(url) {
+self.registration.showNotification("Berichtje via de serviceworker: ", {
+  actions: [{action: 'archive', title: "Archive"}]
+});
+
+function createRequestWithCacheBusting(url) {
     var
     request,
     cacheBustingUrl;
