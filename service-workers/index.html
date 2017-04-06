@@ -17,6 +17,7 @@ if ('serviceWorker' in navigator) {
     scope: './'
   }).then(function (registration) {
     var serviceWorker;
+    var myPublicKey ="BLK5KY2tHz5fpOiIr-RHk8kPDxXQMScl1RusHuw8dXDs0AhVqZ1U9cVq77zyyjFMEBwxJMtgvkzfJAxMMgauRDc";
 	  
 function showNotification() {
   Notification.requestPermission(function(result) {
