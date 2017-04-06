@@ -36,10 +36,6 @@ self.addEventListener('fetch', function (event) {
     }
   });
 
-self.registration.showNotification("Berichtje via de serviceworker: ", {
-  actions: [{action: 'archive', title: "Archive"}]
-});
-
 function createRequestWithCacheBusting(url) {
     var
     request,
