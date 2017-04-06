@@ -10,6 +10,9 @@ function printState(state) {
   document.getElementById('state').innerHTML += (" " + state);
 }
 if ('serviceWorker' in navigator) {
+  if ('PushManager' in window) {
+    console.log('Push is enabled');
+  }
   navigator.serviceWorker.register('service-worker.js', {
     scope: './'
   }).then(function (registration) {
